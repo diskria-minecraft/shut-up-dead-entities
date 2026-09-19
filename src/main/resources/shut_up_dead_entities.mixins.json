@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "io.github.diskria.shut_up_dead_entities.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

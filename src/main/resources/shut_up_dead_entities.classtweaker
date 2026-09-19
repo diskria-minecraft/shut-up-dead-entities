@@ -1,6 +1,8 @@
-accessWidener v2 official
+classTweaker v1 official
 
+# AbstractSoundInstance
 accessible field net/minecraft/client/resources/sounds/AbstractSoundInstance pitch F
 accessible field net/minecraft/client/resources/sounds/AbstractSoundInstance volume F
 
+# LivingEntity
 accessible method net/minecraft/world/entity/LivingEntity getDeathSound ()Lnet/minecraft/sounds/SoundEvent;

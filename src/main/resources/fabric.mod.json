@@ -1,30 +1,39 @@
 {
   "schemaVersion": 1,
-  "id": "${modId}",
-  "version": "${modVersion}",
-  "name": "${modName}",
+  "id": "shut_up_dead_entities",
+  "version": "1.2.1",
+  "name": "Shut Up Dead Entities",
   "description": "A client-side mod that smoothly fades out mob sounds upon death. Mutes dead mobs by fading, silencing, and stopping persistent ghost audio from Endermens, Creepers and Nether portals.",
   "authors": [
-    "${author}"
+    "diskria"
   ],
   "contact": {
-    "sources": "${repoUrl}"
+    "homepage": "https://modrinth.com/mod/shut_up_dead_entities",
+    "sources": "https://github.com/diskria-minecraft/shut_up_dead_entities",
+    "issues": "https://github.com/diskria-minecraft/shut_up_dead_entities/issues"
   },
   "license": "MIT",
-  "icon": "assets/shutupdeadentities/icon.png",
+  "icon": "assets/shut_up_dead_entities/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "io.github.diskria.shutupdeadentities.client.ShutUpDeadEntities"
+      {
+        "value": "io.github.diskria.shut_up_dead_entities.ShutUpDeadEntitiesMod",
+        "adapter": "kotlin"
+      }
     ]
   },
   "mixins": [
-    "shutupdeadentities.mixins.json"
+    {
+      "config": "shut_up_dead_entities.mixins.json",
+      "environment": "client"
+    }
   ],
+  "accessWidener": "shut_up_dead_entities.classtweaker",
   "depends": {
-    "java": ">=${minJavaVersion}",
-    "minecraft": ">=${minMinecraftVersion}",
-    "fabricloader": ">=${minLoaderVersion}"
-  },
-  "accessWidener": "shutupdeadentities.accesswidener"
+    "fabricloader": ">=0.19.5",
+    "minecraft": ">=26.3",
+    "java": ">=25",
+    "fabric-language-kotlin": ">=1.13.12+kotlin.2.4.0"
+  }
 }

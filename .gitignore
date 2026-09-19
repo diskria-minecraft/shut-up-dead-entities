@@ -1,6 +1,6 @@
 .gradle/
 .idea/
 build/
-/run/
+run/
 src/main/generated/
 local.properties
