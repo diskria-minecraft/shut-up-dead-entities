@@ -11,7 +11,7 @@ val modId = "shut_up_dead_entities"
 val modPackage = "$namespace.$modId"
 
 group = namespace
-version = "1.3.1"
+version = "1.2.1"
 
 loom {
     accessWidenerPath = file("src/main/resources/$modId.classtweaker")
