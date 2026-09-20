@@ -26,21 +26,28 @@ class PlayerBoundPortalTriggerSoundInstance(
     private var initialVolume: Float = volume
     private var initialPitch: Float = pitch
     private var fadeOutTicks = ShutUpDeadEntitiesMod.FADE_OUT_TICKS
-    private var stopped = false
+    private var isFadingOut: Boolean = false
+    private var stopped: Boolean = false
 
     override fun isStopped(): Boolean = stopped
 
     override fun tick() {
-        if (player.portalProcess?.isInsidePortalThisTick == true) {
-            return
+        if (stopped) return
+        if (!isFadingOut) {
+            val isInsidePortal = player.portalProcess?.isInsidePortalThisTick == true
+            if (!isInsidePortal) {
+                isFadingOut = true
+            }
         }
-        if (fadeOutTicks >= 0) {
-            val progress = fadeOutTicks.toFloat() / ShutUpDeadEntitiesMod.FADE_OUT_TICKS
-            volume = initialVolume * progress
-            pitch = initialPitch * progress
-            fadeOutTicks--
-        } else {
-            stopped = true
+        if (isFadingOut) {
+            if (fadeOutTicks >= 0) {
+                val progress = fadeOutTicks.toFloat() / ShutUpDeadEntitiesMod.FADE_OUT_TICKS
+                volume = initialVolume * progress
+                pitch = initialPitch * progress
+                fadeOutTicks--
+            } else {
+                stopped = true
+            }
         }
     }
 }

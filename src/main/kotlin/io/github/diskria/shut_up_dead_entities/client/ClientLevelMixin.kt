@@ -10,14 +10,23 @@ import net.minecraft.client.resources.sounds.EntityBoundSoundInstance
 import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.client.sounds.SoundEngine.PlayResult
 import net.minecraft.client.sounds.SoundManager
+import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.Identifier
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
+import net.minecraft.tags.BlockTags
+import net.minecraft.tags.FluidTags
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.BubbleColumnBlock
+import net.minecraft.world.level.block.CampfireBlock
+import net.minecraft.world.level.block.RespawnAnchorBlock
+import net.minecraft.world.level.block.entity.BeaconBlockEntity
+import net.minecraft.world.level.block.entity.ConduitBlockEntity
 import net.minecraft.world.level.entity.EntityTypeTest
+import net.minecraft.world.level.material.WaterFluid
 import net.minecraft.world.phys.AABB
 import org.spongepowered.asm.mixin.injection.At
 
@@ -45,8 +54,9 @@ abstract class ClientLevelMixin(@Origin private val level: ClientLevel) {
         @Local(name = ["pitch"], argsOnly = true) pitch: Float,
         @Local(name = ["seed"], argsOnly = true) seed: Long,
     ): PlayResult {
-        val entityBound = boundSoundToEntityOrNull(x, y, z, sound, source, volume, pitch, seed)
-        return original.call(soundManager, entityBound ?: instance)
+        val boundSound = boundSoundToEntityOrNull(x, y, z, sound, source, volume, pitch, seed)
+            ?: boundSoundToBlockOrNull(x, y, z, sound, source, volume, pitch, seed)
+        return original.call(soundManager, boundSound ?: instance)
     }
 
     @WrapOperation(
@@ -70,8 +80,9 @@ abstract class ClientLevelMixin(@Origin private val level: ClientLevel) {
         @Local(name = ["pitch"], argsOnly = true) pitch: Float,
         @Local(name = ["seed"], argsOnly = true) seed: Long,
     ) {
-        val entityBound = boundSoundToEntityOrNull(x, y, z, sound, source, volume, pitch, seed)
-        original.call(soundManager, entityBound ?: instance, delay)
+        val boundSound = boundSoundToEntityOrNull(x, y, z, sound, source, volume, pitch, seed)
+            ?: boundSoundToBlockOrNull(x, y, z, sound, source, volume, pitch, seed)
+        original.call(soundManager, boundSound ?: instance, delay)
     }
 
     private fun boundSoundToEntityOrNull(
@@ -95,6 +106,88 @@ abstract class ClientLevelMixin(@Origin private val level: ClientLevel) {
         }
         val targetEntity = aliveEntity ?: return null
         return EntityBoundSoundInstance(sound, source, volume, pitch, targetEntity, seed)
+    }
+
+    private fun boundSoundToBlockOrNull(
+        x: Double,
+        y: Double,
+        z: Double,
+        sound: SoundEvent,
+        source: SoundSource,
+        volume: Float,
+        pitch: Float,
+        seed: Long,
+    ): BlockBoundSoundInstance? {
+        val soundPath = sound.location.path
+        val blockStatePredicate = SOUND_TO_BLOCK_PREDICATES[soundPath] ?: return null
+        val pos = BlockPos.containing(x, y, z)
+        val isAlivePredicate: () -> Boolean = { blockStatePredicate(level, pos) }
+        if (!isAlivePredicate()) return null
+        return BlockBoundSoundInstance(
+            event = sound,
+            source = source,
+            volume = volume,
+            pitch = pitch,
+            x = x,
+            y = y,
+            z = z,
+            seed = seed,
+            isAlive = isAlivePredicate,
+        )
+    }
+
+    companion object {
+        private val SOUND_TO_BLOCK_PREDICATES: Map<String, (Level, BlockPos) -> Boolean> = mapOf(
+            "block.water.ambient" to { level, pos ->
+                val state = level.getBlockState(pos)
+                val fluidState = state.fluidState
+                fluidState.`is`(FluidTags.WATER) && !fluidState.isSource && !fluidState.getValue(WaterFluid.FALLING)
+            },
+            "block.fire.ambient" to { level, pos ->
+                level.getBlockState(pos).`is`(BlockTags.FIRE)
+            },
+            "block.campfire.crackle" to { level, pos ->
+                CampfireBlock.isLitCampfire(level.getBlockState(pos))
+            },
+            "block.lava.ambient" to { level, pos ->
+                val state = level.getBlockState(pos)
+                if (state.fluidState.`is`(FluidTags.LAVA)) {
+                    val aboveState = level.getBlockState(pos.above())
+                    aboveState.isAir || !aboveState.isSolidRender
+                } else false
+            },
+            "block.portal.ambient" to { level, pos ->
+                level.getBlockState(pos).`is`(BlockTags.PORTALS)
+            },
+            "block.beacon.activate" to { level, pos ->
+                level.getBlockEntity(pos) is BeaconBlockEntity
+            },
+            "block.beacon.ambient" to { level, pos ->
+                (level.getBlockEntity(pos) as? BeaconBlockEntity)?.beamSections?.isNotEmpty() == true
+            },
+            "block.bubble_column.upwards_ambient" to { level, pos ->
+                level.getBlockState(pos).block is BubbleColumnBlock
+            },
+            "block.bubble_column.whirlpool_ambient" to { level, pos ->
+                level.getBlockState(pos).block is BubbleColumnBlock
+            },
+            "block.conduit.activate" to { level, pos ->
+                level.getBlockEntity(pos) is ConduitBlockEntity
+            },
+            "block.conduit.ambient" to { level, pos ->
+                (level.getBlockEntity(pos) as? ConduitBlockEntity)?.isActive == true
+            },
+            "block.conduit.ambient.short" to { level, pos ->
+                (level.getBlockEntity(pos) as? ConduitBlockEntity)?.isActive == true
+            },
+            "block.respawn_anchor.charge" to { level, pos ->
+                level.getBlockState(pos).block is RespawnAnchorBlock
+            },
+            "block.respawn_anchor.ambient" to { level, pos ->
+                val state = level.getBlockState(pos)
+                state.block is RespawnAnchorBlock && state.getValue(RespawnAnchorBlock.CHARGE) > 0
+            },
+        )
     }
 }
 

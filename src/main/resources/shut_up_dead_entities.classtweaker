@@ -5,6 +5,9 @@ accessible field net/minecraft/client/resources/sounds/AbstractSoundInstance pit
 accessible field net/minecraft/client/resources/sounds/AbstractSoundInstance volume F
 accessible field net/minecraft/client/resources/sounds/AbstractSoundInstance random Lnet/minecraft/util/RandomSource;
 
+# BeaconBlockEntity
+accessible field net/minecraft/world/level/block/entity/BeaconBlockEntity beamSections Ljava/util/List;
+
 # LivingEntity
 accessible method net/minecraft/world/entity/LivingEntity getDeathSound ()Lnet/minecraft/sounds/SoundEvent;
 accessible method net/minecraft/world/entity/LivingEntity getHurtSound (Lnet/minecraft/world/damagesource/DamageSource;)Lnet/minecraft/sounds/SoundEvent;

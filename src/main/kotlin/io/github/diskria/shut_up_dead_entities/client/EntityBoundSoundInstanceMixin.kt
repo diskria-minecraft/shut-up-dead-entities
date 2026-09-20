@@ -12,34 +12,35 @@ import net.minecraft.world.entity.LivingEntity
 import org.spongepowered.asm.mixin.injection.At
 
 @KMixin(EntityBoundSoundInstance::class, initStrategy = InitStrategy.Eager)
-abstract class EntityBoundSoundInstanceMixin(@Origin private val instance: EntityBoundSoundInstance) {
+abstract class EntityBoundSoundInstanceMixin(@Origin private val sound: EntityBoundSoundInstance) {
 
-    private var initialVolume: Float = instance.volume
-    private var initialPitch: Float = instance.pitch
+    private var initialVolume: Float = sound.volume
+    private var initialPitch: Float = sound.pitch
     private var fadeOutTicks: Int = ShutUpDeadEntitiesMod.FADE_OUT_TICKS
+    private var isFadingOut: Boolean = false
 
     @WrapOperation(
         method = ["tick"],
         at = [At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;isRemoved()Z")]
     )
-    fun interceptEntityRemovedCheck(instance: Entity, original: Operation<Boolean>): Boolean =
-        if (instance is LivingEntity) instance.isDeadOrDying
-        else original.call(instance)
-
-    @WrapOperation(
-        method = ["tick"],
-        at = [At(value = "INVOKE", target = "Lnet/minecraft/client/resources/sounds/EntityBoundSoundInstance;stop()V")]
-    )
-    fun EntityBoundSoundInstance.interceptStopOnEntityRemove(
-        instance: EntityBoundSoundInstance, original: Operation<Void>
-    ) {
-        if (fadeOutTicks >= 0) {
-            val progress = fadeOutTicks.toFloat() / ShutUpDeadEntitiesMod.FADE_OUT_TICKS
-            volume = initialVolume * progress
-            pitch = initialPitch * progress
-            fadeOutTicks--
-        } else {
-            original.call(instance)
+    fun interceptEntityRemovedCheck(entity: Entity, original: Operation<Boolean>): Boolean {
+        if (entity !is LivingEntity) {
+            return original.call(entity)
         }
+        if (!isFadingOut && entity.isDeadOrDying) {
+            isFadingOut = true
+        }
+        if (isFadingOut) {
+            if (fadeOutTicks > 0) {
+                val progress = fadeOutTicks.toFloat() / ShutUpDeadEntitiesMod.FADE_OUT_TICKS
+                sound.volume = initialVolume * progress
+                sound.pitch = initialPitch * progress
+                fadeOutTicks--
+                return false
+            } else {
+                return true
+            }
+        }
+        return false
     }
 }
