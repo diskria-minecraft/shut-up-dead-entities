@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "shut_up_dead_entities",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "name": "Shut Up Dead Entities",
   "description": "A client-side mod that smoothly fades out mob sounds upon death. Mutes dead mobs by fading, silencing, and stopping persistent ghost audio from Endermens, Creepers and Nether portals.",
   "authors": [
