@@ -6,3 +6,4 @@ accessible field net/minecraft/client/resources/sounds/AbstractSoundInstance vol
 
 # LivingEntity
 accessible method net/minecraft/world/entity/LivingEntity getDeathSound ()Lnet/minecraft/sounds/SoundEvent;
+accessible method net/minecraft/world/entity/LivingEntity getHurtSound (Lnet/minecraft/world/damagesource/DamageSource;)Lnet/minecraft/sounds/SoundEvent;

@@ -7,8 +7,6 @@ pluginManagement {
     }
 }
 
-rootProject.name = "shut_up_dead_entities"
-
 dependencyResolutionManagement {
     repositories {
         mavenLocal()
