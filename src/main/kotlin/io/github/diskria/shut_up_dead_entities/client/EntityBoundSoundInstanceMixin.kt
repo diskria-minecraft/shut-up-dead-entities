@@ -2,31 +2,21 @@ package io.github.diskria.shut_up_dead_entities.client
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation
+import io.github.diskria.lapis.annotations.InitStrategy
 import io.github.diskria.lapis.annotations.KMixin
+import io.github.diskria.lapis.annotations.Origin
+import io.github.diskria.shut_up_dead_entities.ShutUpDeadEntitiesMod
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance
-import net.minecraft.sounds.SoundEvent
-import net.minecraft.sounds.SoundSource
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import org.spongepowered.asm.mixin.injection.At
-import org.spongepowered.asm.mixin.injection.Inject
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
-@KMixin(EntityBoundSoundInstance::class)
-class EntityBoundSoundInstanceMixin {
+@KMixin(EntityBoundSoundInstance::class, initStrategy = InitStrategy.Eager)
+abstract class EntityBoundSoundInstanceMixin(@Origin private val instance: EntityBoundSoundInstance) {
 
-    private var fadeOutTicks = FADE_OUT_TICKS
-    private var initialVolume: Float? = null
-    private var initialPitch: Float? = null
-
-    @Inject(method = ["<init>"], at = [At("RETURN")])
-    fun initReturn(
-        event: SoundEvent, source: SoundSource, volume: Float, pitch: Float, entity: Entity, seed: Long,
-        callback: CallbackInfo,
-    ) {
-        initialVolume = volume
-        initialPitch = pitch
-    }
+    private var initialVolume: Float = instance.volume
+    private var initialPitch: Float = instance.pitch
+    private var fadeOutTicks: Int = ShutUpDeadEntitiesMod.FADE_OUT_TICKS
 
     @WrapOperation(
         method = ["tick"],
@@ -44,18 +34,12 @@ class EntityBoundSoundInstanceMixin {
         instance: EntityBoundSoundInstance, original: Operation<Void>
     ) {
         if (fadeOutTicks >= 0) {
-            val maxVolume = initialVolume ?: return
-            val maxPitch = initialPitch ?: return
-            val progress = fadeOutTicks.toFloat() / FADE_OUT_TICKS
-            volume = maxVolume * progress
-            pitch = maxPitch * progress
+            val progress = fadeOutTicks.toFloat() / ShutUpDeadEntitiesMod.FADE_OUT_TICKS
+            volume = initialVolume * progress
+            pitch = initialPitch * progress
             fadeOutTicks--
         } else {
             original.call(instance)
         }
-    }
-
-    companion object {
-        private const val FADE_OUT_TICKS = 20
     }
 }

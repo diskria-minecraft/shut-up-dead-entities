@@ -3,6 +3,7 @@ classTweaker v1 official
 # AbstractSoundInstance
 accessible field net/minecraft/client/resources/sounds/AbstractSoundInstance pitch F
 accessible field net/minecraft/client/resources/sounds/AbstractSoundInstance volume F
+accessible field net/minecraft/client/resources/sounds/AbstractSoundInstance random Lnet/minecraft/util/RandomSource;
 
 # LivingEntity
 accessible method net/minecraft/world/entity/LivingEntity getDeathSound ()Lnet/minecraft/sounds/SoundEvent;
