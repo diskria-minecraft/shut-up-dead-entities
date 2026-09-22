@@ -2,6 +2,7 @@ package io.github.diskria.shut_up_dead_entities.client
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation
+import io.github.diskria.lapis.annotations.Env
 import io.github.diskria.lapis.annotations.KMixin
 import net.minecraft.client.player.LocalPlayer
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
@@ -10,7 +11,7 @@ import net.minecraft.client.sounds.SoundEngine.PlayResult
 import net.minecraft.client.sounds.SoundManager
 import org.spongepowered.asm.mixin.injection.At
 
-@KMixin(LocalPlayer::class)
+@KMixin(LocalPlayer::class, Env.Client)
 class LocalPlayerMixin {
 
     @WrapOperation(

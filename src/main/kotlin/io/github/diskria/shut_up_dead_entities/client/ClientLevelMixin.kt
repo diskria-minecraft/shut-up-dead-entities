@@ -3,6 +3,7 @@ package io.github.diskria.shut_up_dead_entities.client
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation
 import com.llamalad7.mixinextras.sugar.Local
+import io.github.diskria.lapis.annotations.Env
 import io.github.diskria.lapis.annotations.KMixin
 import io.github.diskria.lapis.annotations.Origin
 import net.minecraft.client.multiplayer.ClientLevel
@@ -30,7 +31,7 @@ import net.minecraft.world.level.material.WaterFluid
 import net.minecraft.world.phys.AABB
 import org.spongepowered.asm.mixin.injection.At
 
-@KMixin(ClientLevel::class)
+@KMixin(ClientLevel::class, Env.Client)
 abstract class ClientLevelMixin(@Origin private val level: ClientLevel) {
 
     @WrapOperation(

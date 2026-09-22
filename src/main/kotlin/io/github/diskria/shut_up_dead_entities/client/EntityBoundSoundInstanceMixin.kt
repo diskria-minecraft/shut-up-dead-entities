@@ -2,6 +2,7 @@ package io.github.diskria.shut_up_dead_entities.client
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation
+import io.github.diskria.lapis.annotations.Env
 import io.github.diskria.lapis.annotations.InitStrategy
 import io.github.diskria.lapis.annotations.KMixin
 import io.github.diskria.lapis.annotations.Origin
@@ -11,7 +12,7 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import org.spongepowered.asm.mixin.injection.At
 
-@KMixin(EntityBoundSoundInstance::class, initStrategy = InitStrategy.Eager)
+@KMixin(EntityBoundSoundInstance::class, Env.Client, InitStrategy.Eager)
 abstract class EntityBoundSoundInstanceMixin(@Origin private val sound: EntityBoundSoundInstance) {
 
     private var initialVolume: Float = sound.volume
